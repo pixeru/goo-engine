@@ -1,0 +1,35 @@
+name: Build Blender
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git cmake ninja-build build-essential \
+            libx11-dev libxi-dev libxxf86vm-dev libxcursor-dev libxrandr-dev \
+            libxinerama-dev libglew-dev libglu1-mesa-dev libssl-dev \
+            libjpeg-dev libpng-dev libtiff-dev libopenexr-dev python3-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWITH_INSTALL_PORTABLE=ON
+
+      - name: Build Blender
+        run: cmake --build build --target install --parallel
+
+      - name: Verify binary
+        run: |
+          ls -lh build/bin
